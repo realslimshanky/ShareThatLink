@@ -4,6 +4,9 @@ import json
 import sys
 import signal
 import subprocess
+import re
+
+from telegram.ext import Updater, CommandHandler, MessageHandler, filters
 
 """
 ---Process ID Management Starts---
@@ -50,3 +53,18 @@ else:
 ---Token/Key Management Ends---
 """
 
+updater = Updater(TelegramBotToken)
+
+def start(bot, update):
+    print(update)
+
+def checkForUrl(bot, update):
+    User = update.message.from_user
+    URLs = re.findall('http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\(\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+', update.message.text)
+    if len(URLs):
+        print("/n".join(URLs))
+
+updater.dispatcher.add_handler(CommandHandler("start", start))
+updater.dispatcher.add_handler(MessageHandler(filters.Filters.text, checkForUrl))
+
+updater.start_polling()
