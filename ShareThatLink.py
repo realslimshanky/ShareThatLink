@@ -60,12 +60,13 @@ else:
 updater = Updater(TelegramBotToken)
 
 def start(bot, update):
-    print(update)
+    # print(update) # Uncomment for debugging and remove this line.
+     update.message.reply_text('Hello {}.\n ShareThatLink bot is used to share URLs from Telegram Group to Slack Channel of your choice. Look into the project repository to find out how it works.\n https://github.com/realslimshanky/ShareThatLink'.format(update.message.from_user.first_name))
 
 def checkForUrl(bot, update):
     User = update.message.from_user
     if str(update.message.chat.id) == TelegramGroupID:
-        print(update.message.from_user)
+        # print(update.message.from_user) # Uncomment for debugging and remove this line.
         URLs = re.findall('http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\(\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+', update.message.text)
         if len(URLs):
             print("/n".join(URLs))
