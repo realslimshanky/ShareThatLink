@@ -1,10 +1,12 @@
 import os
+import re
 import json
 import json
 import sys
 import signal
+import requests
 import subprocess
-import re
+
 
 from telegram.ext import Updater, CommandHandler, MessageHandler, filters
 
@@ -37,15 +39,17 @@ This part will check for the config.txt file which holds the Telegram and will a
 configError = "Please open config.txt file located in the project directory and relace the value '0' of Telegram-Bot-Token with the Token you recieved from botfather."
 if 'config.txt' not in os.listdir():
     with open('config.txt', mode='w') as f:
-        json.dump({'Telegram-Bot-Token': 0}, f)
+        json.dump({'Telegram-Bot-Token': 0, 'Telegram-Group-ID': 0, 'Slack-Channel-Webhook': 0}, f)
         print(configError)
         sys.exit(0)
 else:
     with open('config.txt', mode='r') as f:
         config = json.loads(f.read())
-        if config["Telegram-Bot-Token"]:
+        if config["Telegram-Bot-Token"] and config["Telegram-Group-ID"] and config["Slack-Channel-Webhook"]:
             print("Token Present, continuing...")
             TelegramBotToken = config["Telegram-Bot-Token"]
+            TelegramGroupID = config["Telegram-Group-ID"]
+            SlackChannelWebhook = config["Slack-Channel-Webhook"]
         else:
             print(configError)
             sys.exit(0)
@@ -60,9 +64,14 @@ def start(bot, update):
 
 def checkForUrl(bot, update):
     User = update.message.from_user
-    URLs = re.findall('http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\(\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+', update.message.text)
-    if len(URLs):
-        print("/n".join(URLs))
+    if str(update.message.chat.id) == TelegramGroupID:
+        print(update.message.from_user)
+        URLs = re.findall('http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\(\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+', update.message.text)
+        if len(URLs):
+            print("/n".join(URLs))
+            data = {'text': "{0} shared the following resource(s) on TPB Telegram Group.\n{1}".format(User.first_name+" "+User.last_name, "/n".join(URLs))}
+            requests.post(SlackChannelWebhook, data=json.dumps(data), headers={'Content-type': 'application/json'})
+
 
 updater.dispatcher.add_handler(CommandHandler("start", start))
 updater.dispatcher.add_handler(MessageHandler(filters.Filters.text, checkForUrl))
