@@ -69,7 +69,7 @@ def checkForUrl(bot, update):
         # print(update.message.from_user) # Uncomment for debugging and remove this line.
         URLs = re.findall('http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\(\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+', update.message.text)
         if len(URLs):
-            print("/n".join(URLs))
+            print("\n".join(URLs))
             data = {'text': "{0} shared the following resource(s) on TPB Telegram Group.\n{1}".format(User.first_name+" "+User.last_name, "/n".join(URLs))}
             requests.post(SlackChannelWebhook, data=json.dumps(data), headers={'Content-type': 'application/json'})
 
